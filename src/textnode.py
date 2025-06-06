@@ -10,6 +10,7 @@ class TextType(Enum):
 
 # Our "TextNode" class represents the various types of inline text that can exist in HTML and Markdown.
 # https://www.w3schools.com/html/html_blocks.asp
+
 class TextNode():
     def __init__(self, text, text_type, url=None):
         self.text = text
