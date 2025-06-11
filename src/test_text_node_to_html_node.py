@@ -27,7 +27,6 @@ class TestTexttoHTMLNode(unittest.TestCase):
         self.assertEqual(html_node.tag, "code")
         self.assertEqual(html_node.value, "This is a code node")
 
-    
     def test_link(self):
         node = TextNode("Search Via Google", TextType.LINK, "http://www.Google.com")
         html_node = text_node_to_html_node(node)
