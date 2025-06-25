@@ -11,7 +11,7 @@ def text_to_textnodes(text):
     #print(f"bold nodes = {nodes} \n")
 
     nodes = split_nodes_delimiter(nodes, "_", TextType.ITALIC_TEXT)
-    #print(f"italic nodes (italic_nodes) = {nodes} \n")
+
 
     nodes = split_nodes_delimiter(nodes, "`", TextType.CODE_TEXT)
     #print(f"code_nodes = {nodes} \n")

@@ -3,6 +3,8 @@ from HTMLNode import *
 from Text_to_textNodes import text_to_textnodes
 from text_node_to_html_node import text_node_to_html_node
 from textnode import TextNode, TextType
+from parentnode import ParentNode
+from leafnode import LeafNode
 import re
 
 def markdown_to_html_node(markdown):
@@ -15,8 +17,8 @@ def markdown_to_html_node(markdown):
 
         if block_type is BlockType.CODE:
             code_content = block.strip("```").strip()
-            code_node = HTMLNode("code", code_content, None)
-            pre_node = HTMLNode("pre", None, [code_node])
+            code_node = LeafNode("code", code_content)
+            pre_node = ParentNode("pre", [code_node])
             block_node = pre_node
             block_nodes_list.append(block_node)
         
@@ -35,29 +37,29 @@ def markdown_to_html_node(markdown):
                     clean_line = re.sub(r'^\d+\.\s+', '', line)
 
                 line_children = text_to_children(clean_line)
-                li_node = HTMLNode("li", None, line_children)
+                li_node = ParentNode("li", line_children)
                 li_nodes.append(li_node)
             tag = block_to_tag(block, block_type)
-            block_node = HTMLNode(tag, None, li_nodes)
+            block_node = ParentNode(tag, li_nodes)
 
             block_nodes_list.append(block_node)
 
         
         else:
+            tag = block_to_tag(block, block_type)
             if block_type == BlockType.HEADING:
                 block = re.sub(r'^#{1,6}\s+', '', block)
             
-            if block_type == BlockType.QUOTE:
+            elif block_type == BlockType.QUOTE:
                 lines = block.split('\n')
                 clean_lines = [line.lstrip('> ') for line in lines]
                 block = '\n'.join(clean_lines)
 
             node_list = text_to_children(block)
-            tag = block_to_tag(block, block_type)
-            block_node = HTMLNode(tag, None, node_list)
+            block_node = ParentNode(tag,node_list)
             block_nodes_list.append(block_node)
         
-    return HTMLNode("div", None, block_nodes_list)
+    return ParentNode("div", block_nodes_list)
         
         
         
@@ -100,6 +102,8 @@ def block_to_tag(block, block_type):
             tag = "h5"
         elif block.startswith("###### "):
             tag = "h6"
+        else:
+            tag = "h1"
     elif block_type == BlockType.PARAGRAPH:
         tag = "p"
     else:

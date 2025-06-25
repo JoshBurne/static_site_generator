@@ -46,10 +46,10 @@ def block_to_block_type(block):
         if quoteblock == True:
             return BlockType.QUOTE
     
-    elif block.startswith("- "):
+    elif block.startswith("- ") or block.startswith("* ") or block.startswith("+ "):
         lines = block.split("\n")
         for line in lines:
-            if line.startswith("- "):
+            if line.startswith("- ") or line.startswith("* ") or line.startswith("+ "):
                 unordered_listblock = True
             else:
                 return BlockType.PARAGRAPH
