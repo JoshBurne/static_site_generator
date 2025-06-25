@@ -3,6 +3,7 @@ import shutil
 from markdown_to_html_node import markdown_to_html_node
 from extract_title import extract_title
 from pathlib import Path
+import sys
 
 
 def verify_directory_path(directory):
@@ -58,7 +59,7 @@ def copy_files_recursively(source, dest):
             copy_files_recursively(source_path, destination_path)
 
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print (f"generating page from {from_path} to {dest_path} using {template_path}")
     with open(from_path, 'r') as f:
         contents_from_path = f.read()
@@ -69,10 +70,10 @@ def generate_page(from_path, template_path, dest_path):
     html_node = markdown_to_html_node(contents_from_path)
     html_string = html_node.to_html()
     title = extract_title(contents_from_path)
-    print(f"TITLE = {title}")
-
     contents_template_path = contents_template_path.replace("{{ Title }}", title)
     contents_template_path = contents_template_path.replace("{{ Content }}", html_string)
+    contents_template_path = contents_template_path.replace('href="/', f'href="{basepath}')
+    contents_template_path = contents_template_path.replace('src="/', f'src="{basepath}')
     
     dest_directory = os.path.dirname(dest_path)  # This gets the directory part
     if not verify_directory_path(dest_directory):
@@ -83,7 +84,7 @@ def generate_page(from_path, template_path, dest_path):
 
 
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     #   for each file in the selected directory
     for filename in os.listdir(dir_path_content):
         # join the path of the old directory and the file name
@@ -94,13 +95,19 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
 
         if os.path.isfile(from_path):
             dest_path = Path(dest_path).with_suffix(".html")
-            generate_page(from_path, template_path, dest_path)
+            generate_page(from_path, template_path, dest_path, basepath)
         else:
-            generate_pages_recursive(from_path, template_path, dest_path)
+            generate_pages_recursive(from_path, template_path, dest_path, basepath)
 
 
 def main():
     
+    if len(sys.argv) >= 2:
+        basepath = sys.argv[1]
+    else:
+        basepath = "/"
+
+
     # file directory locations.
     root_dir = "/home/joshburne/workspace/boot.dev/static_site_generator"
     src_dir = f"{root_dir}/src"
@@ -108,20 +115,21 @@ def main():
     static_dir = f"{root_dir}/static"
     content_dir = f"{root_dir}/content"
     path_template_html = f"{root_dir}/template.html"
+    docs_dir = f"{root_dir}/docs" 
    
 
     # test directories while writing the code
     test_destination_dir = f"{root_dir}/test_desitnation_dir"
     source_dir = f"{root_dir}/sourcedir"
 
-    if verify_directory_path(public_dir):
-        delete_directory(public_dir)
+    if verify_directory_path(docs_dir):
+        delete_directory(docs_dir)
     else:
-        create_new_directory(public_dir)
-    copy_files_recursively(static_dir, public_dir)
+        create_new_directory(docs_dir)
+    copy_files_recursively(static_dir, docs_dir)
 
     print("Generating content...")
-    generate_pages_recursive(content_dir, path_template_html, public_dir)
+    generate_pages_recursive(content_dir, path_template_html, docs_dir, basepath)
     
 
     
