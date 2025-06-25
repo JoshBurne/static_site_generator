@@ -2,6 +2,7 @@ import os
 import shutil
 from markdown_to_html_node import markdown_to_html_node
 from extract_title import extract_title
+from pathlib import Path
 
 
 def verify_directory_path(directory):
@@ -82,6 +83,20 @@ def generate_page(from_path, template_path, dest_path):
 
 
 
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    #   for each file in the selected directory
+    for filename in os.listdir(dir_path_content):
+        # join the path of the old directory and the file name
+        from_path = os.path.join(dir_path_content, filename)
+
+        #join the paths of the new directory and the file name
+        dest_path = os.path.join(dest_dir_path, filename)
+
+        if os.path.isfile(from_path):
+            dest_path = Path(dest_path).with_suffix(".html")
+            generate_page(from_path, template_path, dest_path)
+        else:
+            generate_pages_recursive(from_path, template_path, dest_path)
 
 
 def main():
@@ -91,9 +106,9 @@ def main():
     src_dir = f"{root_dir}/src"
     public_dir = f"{root_dir}/public"
     static_dir = f"{root_dir}/static"
-    content_index_md = "/home/joshburne/workspace/boot.dev/static_site_generator/content/index.md"
-    template_html = "/home/joshburne/workspace/boot.dev/static_site_generator/template.html"
-    public_index = "/home/joshburne/workspace/boot.dev/static_site_generator/public/index.html"
+    content_dir = f"{root_dir}/content"
+    path_template_html = f"{root_dir}/template.html"
+   
 
     # test directories while writing the code
     test_destination_dir = f"{root_dir}/test_desitnation_dir"
@@ -105,7 +120,9 @@ def main():
         create_new_directory(public_dir)
     copy_files_recursively(static_dir, public_dir)
 
-    generate_page(content_index_md, template_html, public_index)
+    print("Generating content...")
+    generate_pages_recursive(content_dir, path_template_html, public_dir)
+    
 
     
 
