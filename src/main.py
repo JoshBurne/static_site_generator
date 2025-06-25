@@ -58,7 +58,7 @@ def copy_files_recursively(source, dest):
 
 
 def generate_page(from_path, template_path, dest_path):
-    print (f"generating page from{from_path}, to {dest_path}, using {template_path}")
+    print (f"generating page from {from_path} to {dest_path} using {template_path}")
     with open(from_path, 'r') as f:
         contents_from_path = f.read()
 
@@ -67,8 +67,18 @@ def generate_page(from_path, template_path, dest_path):
 
     html_node = markdown_to_html_node(contents_from_path)
     html_string = html_node.to_html()
-    print(html_string)
-    extract_title(html_string)
+    title = extract_title(contents_from_path)
+    print(f"TITLE = {title}")
+
+    contents_template_path = contents_template_path.replace("{{ Title }}", title)
+    contents_template_path = contents_template_path.replace("{{ Content }}", html_string)
+    
+    dest_directory = os.path.dirname(dest_path)  # This gets the directory part
+    if not verify_directory_path(dest_directory):
+        create_new_directory(dest_directory)
+
+    with open(dest_path, 'w') as f:
+        f.write(contents_template_path)
 
 
 
@@ -83,7 +93,7 @@ def main():
     static_dir = f"{root_dir}/static"
     content_index_md = "/home/joshburne/workspace/boot.dev/static_site_generator/content/index.md"
     template_html = "/home/joshburne/workspace/boot.dev/static_site_generator/template.html"
-    public_index = "/home/joshburne/workspace/boot.dev/static_site_generator/public/index.css"
+    public_index = "/home/joshburne/workspace/boot.dev/static_site_generator/public/index.html"
 
     # test directories while writing the code
     test_destination_dir = f"{root_dir}/test_desitnation_dir"
@@ -96,6 +106,7 @@ def main():
     copy_files_recursively(static_dir, public_dir)
 
     generate_page(content_index_md, template_html, public_index)
+
     
 
 
