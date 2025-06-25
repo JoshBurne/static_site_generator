@@ -1,5 +1,8 @@
 import os
 import shutil
+from markdown_to_html_node import markdown_to_html_node
+from extract_title import extract_title
+
 
 def verify_directory_path(directory):
     # returns true if the directory exists, false otherwise
@@ -19,14 +22,13 @@ def found_dir_at_path(path_to_directory):
 
 def create_new_directory(path_ending_with_name):
     # creates a new directory, using a path and ending with the /directory_name
-    return os.mkdir(path_ending_with_name)
+    return os.makedirs(path_ending_with_name, exist_ok=True)
 
 def copy_file(old, new):
     return shutil.copy(old, new)
 
 def delete_directory(path):
     return shutil.rmtree(path)
-
 
 def file_or_directory(path):
     files = list_directory_files(path)
@@ -37,6 +39,7 @@ def file_or_directory(path):
         if found_dir_at_path(full_path) == True:
             print(f"{file} is a 'directory' type")
 
+#detailed functions:
 def copy_files_recursively(source, dest):
     files = list_directory_files(source)
     for file in files:
@@ -54,6 +57,22 @@ def copy_files_recursively(source, dest):
             copy_files_recursively(source_path, destination_path)
 
 
+def generate_page(from_path, template_path, dest_path):
+    print (f"generating page from{from_path}, to {dest_path}, using {template_path}")
+    with open(from_path, 'r') as f:
+        contents_from_path = f.read()
+
+    with open(template_path, 'r') as f:
+        contents_template_path = f.read()
+
+    html_node = markdown_to_html_node(contents_from_path)
+    html_string = html_node.to_html()
+    print(html_string)
+    extract_title(html_string)
+
+
+
+
 
 def main():
     
@@ -62,7 +81,10 @@ def main():
     src_dir = f"{root_dir}/src"
     public_dir = f"{root_dir}/public"
     static_dir = f"{root_dir}/static"
-    
+    content_index_md = "/home/joshburne/workspace/boot.dev/static_site_generator/content/index.md"
+    template_html = "/home/joshburne/workspace/boot.dev/static_site_generator/template.html"
+    public_index = "/home/joshburne/workspace/boot.dev/static_site_generator/public/index.css"
+
     # test directories while writing the code
     test_destination_dir = f"{root_dir}/test_desitnation_dir"
     source_dir = f"{root_dir}/sourcedir"
@@ -72,10 +94,10 @@ def main():
     else:
         create_new_directory(public_dir)
     copy_files_recursively(static_dir, public_dir)
+
+    generate_page(content_index_md, template_html, public_index)
     
 
 
-
- 
 main()
 
